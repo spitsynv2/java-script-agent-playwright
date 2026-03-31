@@ -52,29 +52,9 @@ module.exports = defineConfig({
 
   projects: [
     {
-      name: 'iPhone 12',
-      testMatch: /mobile\.spec\.js/,
-      use: { ...devices['iPhone 12'] },
-    },
-    {
-      name: 'iPhone 13',
-      testMatch: /mobile\.spec\.js/,
-      use: { ...devices['iPhone 13'] },
-    },
-    {
-      name: 'iPhone 14',
-      testMatch: /mobile\.spec\.js/,
-      use: { ...devices['iPhone 14'] },
-    },
-    {
       name: 'iPhone 15',
       testMatch: /mobile\.spec\.js/,
       use: { ...devices['iPhone 15'] },
-    },
-    {
-      name: 'iPad Mini',
-      testMatch: /mobile\.spec\.js/,
-      use: { ...devices['iPad Mini'] },
     },
     {
       name: 'iPad Pro 11',
