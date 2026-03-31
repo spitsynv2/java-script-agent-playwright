@@ -1,13 +1,10 @@
 const { defineConfig, devices } = require('@playwright/test');
 
-const BROWSER = process.env.BROWSER || 'chromium';
-const BROWSER_CHANNEL = process.env.BROWSER_CHANNEL || undefined;
-
-const DEVICE_MAP = {
-  chromium: 'Desktop Chrome',
-  firefox: 'Desktop Firefox',
-  webkit: 'Desktop Safari',
-};
+/**
+ * Read environment variables from file.
+ * https://github.com/motdotla/dotenv
+ */
+// require('dotenv').config();
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -20,42 +17,51 @@ module.exports = defineConfig({
   workers: process.env.CI ? 1 : undefined,
 
   use: {
-    baseURL: 'https://www.ebay.com',
     trace: 'on-first-retry',
     screenshot: 'on',
-    viewport: { width: 1920, height: 1080 },
+    video: 'on',
   },
 
   projects: [
     {
-      name: BROWSER,
-      use: {
-        ...devices[DEVICE_MAP[BROWSER] || 'Desktop Chrome'],
-        channel: BROWSER_CHANNEL,
-        launchOptions: {
-          headless: false,
-          args: BROWSER === 'chromium'
-            ? ['--disable-blink-features=AutomationControlled']
-            : [],
-        },
-      },
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
     },
+
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
+
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
   ],
 
   reporter: [
     [
       '@zebrunner/javascript-agent-playwright',
       {
-        enabled: true,
-        projectKey: 'DEF',
+        enabled: process.env.REPORTING_ENABLED === 'true',
+        projectKey: process.env.REPORTING_PROJECT_KEY || 'DEF',
         server: {
-          hostname: 'https://yourCompany.zebrunner.com',
-          accessToken: 'yourAccessToken',
+          hostname: process.env.REPORTING_SERVER_HOSTNAME || 'https://yourCompany.zebrunner.com',
+          accessToken: process.env.REPORTING_SERVER_ACCESS_TOKEN || 'yourAccessToken',
         },
         launch: {
-          displayName: 'Playwright launch',
+          displayName: process.env.REPORTING_LAUNCH_DISPLAY_NAME || 'Playwright launch',
           build: '1.0.0',
           environment: 'Local',
+          treatSkipsAsFailures: true,
+        },
+        logs: {
+          ignorePlaywrightSteps: false,
+          useLinesFromSourceCode: true,
+          ignoreConsole: false,
+          ignoreCustom: false,
+          ignoreManualScreenshots: false,
+          ignoreAutoScreenshots: false,
         },
         milestone: {
           id: null,
@@ -63,9 +69,9 @@ module.exports = defineConfig({
         },
         notifications: {
           notifyOnEachFailure: false,
-          slackChannels: 'dev, qa',
-          teamsChannels: 'dev-channel, management',
-          emails: 'yourEmail@solvd.com',
+          slackChannels: process.env.REPORTING_NOTIFICATION_SLACK_CHANNELS || '',
+          teamsChannels: process.env.REPORTING_NOTIFICATION_MS_TEAMS_CHANNELS || '',
+          emails: process.env.REPORTING_NOTIFICATION_EMAILS || '',
         },
         tcm: {
           zebrunner: {
