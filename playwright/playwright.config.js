@@ -30,7 +30,7 @@ if (process.env.ZEBRUNNER_CAPABILITIES) {
 
 const devicePreset = devices[DEVICE_MAP[browserEngine] || 'Desktop Chrome'];
 let userAgent = devicePreset.userAgent;
-if (browserVersion && userAgent) {
+if (browserVersion && userAgent && /^\d+/.test(browserVersion)) {
   userAgent = userAgent.replace(/Chrome\/[\d.]+/, `Chrome/${browserVersion}`);
 }
 
