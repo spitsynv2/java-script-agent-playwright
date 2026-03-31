@@ -34,6 +34,12 @@ if (browserVersion && userAgent && /^\d+/.test(browserVersion)) {
   userAgent = userAgent.replace(/Chrome\/[\d.]+/, `Chrome/${browserVersion}`);
 }
 
+function patchUserAgent(deviceName) {
+  const preset = devices[deviceName];
+  if (!browserVersion || !preset.userAgent) return {};
+  return { userAgent: preset.userAgent.replace(/Chrome\/[\d.]+/, `Chrome/${browserVersion}`) };
+}
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -56,6 +62,7 @@ module.exports = defineConfig({
       testMatch: /mobile\.spec\.js/,
       use: {
         ...devices['Galaxy S9+'],
+        ...patchUserAgent('Galaxy S9+'),
         ...(channel ? { channel } : {}),
         launchOptions: { args: ['--no-sandbox'] },
       },
@@ -65,6 +72,7 @@ module.exports = defineConfig({
       testMatch: /mobile\.spec\.js/,
       use: {
         ...devices['Galaxy Tab S4'],
+        ...patchUserAgent('Galaxy Tab S4'),
         ...(channel ? { channel } : {}),
         launchOptions: { args: ['--no-sandbox'] },
       },
