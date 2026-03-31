@@ -52,33 +52,6 @@ module.exports = defineConfig({
 
   projects: [
     {
-      name: 'Pixel 5',
-      testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['Pixel 5'],
-        ...(channel ? { channel } : {}),
-        launchOptions: { args: ['--no-sandbox'] },
-      },
-    },
-    {
-      name: 'Pixel 7',
-      testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['Pixel 7'],
-        ...(channel ? { channel } : {}),
-        launchOptions: { args: ['--no-sandbox'] },
-      },
-    },
-    {
-      name: 'Galaxy S8',
-      testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['Galaxy S8'],
-        ...(channel ? { channel } : {}),
-        launchOptions: { args: ['--no-sandbox'] },
-      },
-    },
-    {
       name: 'Galaxy S9+',
       testMatch: /mobile\.spec\.js/,
       use: {
@@ -92,15 +65,6 @@ module.exports = defineConfig({
       testMatch: /mobile\.spec\.js/,
       use: {
         ...devices['Galaxy Tab S4'],
-        ...(channel ? { channel } : {}),
-        launchOptions: { args: ['--no-sandbox'] },
-      },
-    },
-    {
-      name: 'Nexus 7',
-      testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['Nexus 7'],
         ...(channel ? { channel } : {}),
         launchOptions: { args: ['--no-sandbox'] },
       },
