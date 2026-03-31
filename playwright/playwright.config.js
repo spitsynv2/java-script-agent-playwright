@@ -54,50 +54,32 @@ module.exports = defineConfig({
     {
       name: 'iPhone 12',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['iPhone 12'],
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['iPhone 12'] },
     },
     {
       name: 'iPhone 13',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['iPhone 13'],
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['iPhone 13'] },
     },
     {
       name: 'iPhone 14',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['iPhone 14'],
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['iPhone 14'] },
     },
     {
       name: 'iPhone 15',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['iPhone 15'],
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['iPhone 15'] },
     },
     {
       name: 'iPad Mini',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['iPad Mini'],
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['iPad Mini'] },
     },
     {
       name: 'iPad Pro 11',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['iPad Pro 11'],
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['iPad Pro 11'] },
     },
   ],
 
