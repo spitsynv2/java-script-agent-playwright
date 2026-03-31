@@ -53,6 +53,7 @@ module.exports = defineConfig({
   projects: [
     {
       name: browserName,
+      testMatch: /basic\.spec\.js/,
       use: {
         ...devicePreset,
         ...(userAgent ? { userAgent } : {}),
@@ -68,15 +69,105 @@ module.exports = defineConfig({
       },
     },
 
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
+    /* ── iOS Emulators ── */
+    {
+      name: 'iPhone 12',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['iPhone 12'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'iPhone 13',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['iPhone 13'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'iPhone 14',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['iPhone 14'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'iPhone 15',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['iPhone 15'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'iPad Mini',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['iPad Mini'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'iPad Pro 11',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['iPad Pro 11'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
 
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+    /* ── Android Emulators ── */
+    {
+      name: 'Pixel 5',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['Pixel 5'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'Pixel 7',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['Pixel 7'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'Galaxy S8',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['Galaxy S8'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'Galaxy S9+',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['Galaxy S9+'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'Galaxy Tab S4',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['Galaxy Tab S4'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'Nexus 7',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['Nexus 7'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
   ],
 
   reporter: [
