@@ -12,6 +12,7 @@ const CHANNEL_MAP = { chrome: 'chrome', msedge: 'msedge' };
 
 let browserEngine = 'chromium';
 let browserName = 'chromium';
+let browserVersion = undefined;
 let channel = undefined;
 if (process.env.ZEBRUNNER_CAPABILITIES) {
   try {
@@ -21,7 +22,16 @@ if (process.env.ZEBRUNNER_CAPABILITIES) {
       browserEngine = ENGINE_MAP[caps.browserName] || 'chromium';
       channel = CHANNEL_MAP[caps.browserName];
     }
+    if (caps.browserVersion) {
+      browserVersion = caps.browserVersion;
+    }
   } catch (e) { /* ignore parse errors */ }
+}
+
+const devicePreset = devices[DEVICE_MAP[browserEngine] || 'Desktop Chrome'];
+let userAgent = devicePreset.userAgent;
+if (browserVersion && userAgent) {
+  userAgent = userAgent.replace(/Chrome\/[\d.]+/, `Chrome/${browserVersion}`);
 }
 
 /**
@@ -44,7 +54,8 @@ module.exports = defineConfig({
     {
       name: browserName,
       use: {
-        ...devices[DEVICE_MAP[browserEngine] || 'Desktop Chrome'],
+        ...devicePreset,
+        ...(userAgent ? { userAgent } : {}),
         ...(channel ? { channel } : {}),
         launchOptions: {
           args: browserEngine === 'firefox'
