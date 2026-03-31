@@ -52,31 +52,53 @@ module.exports = defineConfig({
 
   projects: [
     {
-      name: browserName,
+      name: 'iPhone 12',
+      testMatch: /mobile\.spec\.js/,
       use: {
-        ...devicePreset,
-        ...(userAgent ? { userAgent } : {}),
-        ...(channel ? { channel } : {}),
-        launchOptions: {
-          args: browserEngine === 'firefox'
-            ? ['-no-remote']
-            : ['--no-sandbox'],
-          firefoxUserPrefs: browserEngine === 'firefox'
-            ? { 'security.sandbox.content.level': 0 }
-            : undefined,
-        },
+        ...devices['iPhone 12'],
+        launchOptions: { args: ['--no-sandbox'] },
       },
     },
-
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+    {
+      name: 'iPhone 13',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['iPhone 13'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'iPhone 14',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['iPhone 14'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'iPhone 15',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['iPhone 15'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'iPad Mini',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['iPad Mini'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'iPad Pro 11',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['iPad Pro 11'],
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
   ],
 
   reporter: [
