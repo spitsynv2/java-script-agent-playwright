@@ -3,49 +3,9 @@ const { currentTest, currentLaunch, zebrunner } = require('@zebrunner/javascript
 
 test.describe('Playwright website tests', () => {
 
-  test('has title [@small, @fast]', async ({ page }) => {
-    zebrunner.testCaseKey('DEF-1');
-    currentTest.setMaintainer('admin');
-
-    await page.goto('https://playwright.dev/');
-
-    await expect(page).toHaveTitle(/Playwright/);
-  });
-
-  test('get started link [@medium, @fast]', async ({ page }) => {
-    zebrunner.testCaseKey('DEF-2');
-    currentTest.setMaintainer('admin');
-
-    await page.goto('https://playwright.dev/');
-
-    await page.getByRole('link', { name: 'Get started' }).click();
-
-    await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
-  });
-
-  test('check npm tab on getting started [@medium, @fast]', async ({ page }) => {
-    zebrunner.testCaseKey('DEF-3');
-    currentTest.setMaintainer('admin');
-
-    currentTest.log.info('Navigating to Playwright docs');
-    await page.goto('https://playwright.dev/');
-
-    currentTest.log.info('Clicking Get started link');
-    await page.getByRole('link', { name: 'Get started' }).click();
-
-    await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
-
-    currentTest.log.info('Checking npm tab is visible');
-    const nodeTab = page.getByRole('tab', { name: 'npm', exact: true }).first();
-    await expect(nodeTab).toBeVisible();
-
-    currentTest.attachScreenshot(await page.screenshot());
-    currentTest.log.info('Getting started page verified');
-  });
-
   test('complete docs guide walkthrough [@large, @slow]', async ({ page }) => {
     test.setTimeout(120_000);
-    zebrunner.testCaseKey('DEF-4');
+    zebrunner.testCaseKey('DEF-1');
     currentTest.setMaintainer('admin');
     currentTest.attachLabel('scope', 'navigation', 'docs', 'e2e');
 
@@ -98,7 +58,6 @@ test.describe('Playwright website tests', () => {
       }
     }
 
-    // Extra step: interact with tabs on Installation page
     currentTest.log.info('Returning to Installation page for tab interactions');
     await page.goto('https://playwright.dev/docs/intro');
     await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
@@ -118,7 +77,7 @@ test.describe('Playwright website tests', () => {
 
   test('API reference deep dive [@large, @slow]', async ({ page }) => {
     test.setTimeout(120_000);
-    zebrunner.testCaseKey('DEF-5');
+    zebrunner.testCaseKey('DEF-2');
     currentTest.setMaintainer('admin');
     currentTest.attachLabel('scope', 'api', 'e2e');
 
@@ -171,7 +130,6 @@ test.describe('Playwright website tests', () => {
       }
     }
 
-    // Search within API section
     currentTest.log.info('Performing search from API docs');
     const searchTerms = ['waitForSelector', 'click', 'fill'];
     for (const term of searchTerms) {
@@ -200,7 +158,7 @@ test.describe('Playwright website tests', () => {
 
   test('cross-language docs exploration [@large, @slow]', async ({ page }) => {
     test.setTimeout(120_000);
-    zebrunner.testCaseKey('DEF-6');
+    zebrunner.testCaseKey('DEF-3');
     currentTest.setMaintainer('admin');
     currentTest.attachLabel('scope', 'i18n', 'e2e');
 
@@ -237,7 +195,6 @@ test.describe('Playwright website tests', () => {
         currentTest.attachScreenshot(await page.screenshot());
       }
 
-      // Community page per language
       currentTest.log.info(`${lang.name}: visiting Community page`);
       await page.goto(`https://playwright.dev${lang.prefix}/community/welcome`);
       await expect(page).toHaveTitle(/Playwright/);
@@ -248,7 +205,6 @@ test.describe('Playwright website tests', () => {
       currentTest.attachScreenshot(await page.screenshot());
     }
 
-    // Final search across docs
     currentTest.log.info('Final: searching across Node.js docs');
     await page.goto('https://playwright.dev/');
 
