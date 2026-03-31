@@ -51,80 +51,45 @@ module.exports = defineConfig({
   },
 
   projects: [
-    {
-      name: browserName,
-      testMatch: /basic\.spec\.js/,
-      use: {
-        ...devicePreset,
-        ...(userAgent ? { userAgent } : {}),
-        ...(channel ? { channel } : {}),
-        launchOptions: {
-          args: browserEngine === 'firefox'
-            ? ['-no-remote']
-            : ['--no-sandbox'],
-          firefoxUserPrefs: browserEngine === 'firefox'
-            ? { 'security.sandbox.content.level': 0 }
-            : undefined,
-        },
-      },
-    },
-
-    /* ── iOS Emulators ── */
+    /* ── iOS Emulators (WebKit — no launch args needed) ── */
     {
       name: 'iPhone 12',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['iPhone 12'],
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['iPhone 12'] },
     },
     {
       name: 'iPhone 13',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['iPhone 13'],
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['iPhone 13'] },
     },
     {
       name: 'iPhone 14',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['iPhone 14'],
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['iPhone 14'] },
     },
     {
       name: 'iPhone 15',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['iPhone 15'],
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['iPhone 15'] },
     },
     {
       name: 'iPad Mini',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['iPad Mini'],
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['iPad Mini'] },
     },
     {
       name: 'iPad Pro 11',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['iPad Pro 11'],
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['iPad Pro 11'] },
     },
 
-    /* ── Android Emulators ── */
+    /* ── Android Emulators (browser via Zebrunner capabilities) ── */
     {
       name: 'Pixel 5',
       testMatch: /mobile\.spec\.js/,
       use: {
         ...devices['Pixel 5'],
+        ...(channel ? { channel } : {}),
         launchOptions: { args: ['--no-sandbox'] },
       },
     },
@@ -133,6 +98,7 @@ module.exports = defineConfig({
       testMatch: /mobile\.spec\.js/,
       use: {
         ...devices['Pixel 7'],
+        ...(channel ? { channel } : {}),
         launchOptions: { args: ['--no-sandbox'] },
       },
     },
@@ -141,6 +107,7 @@ module.exports = defineConfig({
       testMatch: /mobile\.spec\.js/,
       use: {
         ...devices['Galaxy S8'],
+        ...(channel ? { channel } : {}),
         launchOptions: { args: ['--no-sandbox'] },
       },
     },
@@ -149,6 +116,7 @@ module.exports = defineConfig({
       testMatch: /mobile\.spec\.js/,
       use: {
         ...devices['Galaxy S9+'],
+        ...(channel ? { channel } : {}),
         launchOptions: { args: ['--no-sandbox'] },
       },
     },
@@ -157,6 +125,7 @@ module.exports = defineConfig({
       testMatch: /mobile\.spec\.js/,
       use: {
         ...devices['Galaxy Tab S4'],
+        ...(channel ? { channel } : {}),
         launchOptions: { args: ['--no-sandbox'] },
       },
     },
@@ -165,6 +134,7 @@ module.exports = defineConfig({
       testMatch: /mobile\.spec\.js/,
       use: {
         ...devices['Nexus 7'],
+        ...(channel ? { channel } : {}),
         launchOptions: { args: ['--no-sandbox'] },
       },
     },
