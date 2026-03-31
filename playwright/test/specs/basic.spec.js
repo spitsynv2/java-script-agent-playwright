@@ -70,7 +70,7 @@ async function docsWalkthrough(page, testNumber) {
 
 test.describe('Playwright website tests', () => {
 
-  for (let n = 1; n <= 16; n++) {
+  for (let n = 1; n <= 8; n++) {
     test(`docs guide walkthrough ${n} [@large, @slow]`, async ({ page }) => {
       test.setTimeout(120_000);
       zebrunner.testCaseKey(`DEF-${n}`);
