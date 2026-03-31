@@ -6,6 +6,16 @@ const { defineConfig, devices } = require('@playwright/test');
  */
 // require('dotenv').config();
 
+// Connect to Zebrunner Hub via Selenium Grid (experimental)
+// https://playwright.dev/docs/selenium-grid
+const useRemoteGrid = !!process.env.ZEBRUNNER_HUB_URL;
+if (useRemoteGrid) {
+  process.env.SELENIUM_REMOTE_URL = process.env.ZEBRUNNER_HUB_URL;
+  if (process.env.ZEBRUNNER_CAPABILITIES) {
+    process.env.SELENIUM_REMOTE_CAPABILITIES = process.env.ZEBRUNNER_CAPABILITIES;
+  }
+}
+
 const ENGINE_MAP = { chrome: 'chromium', msedge: 'chromium', firefox: 'firefox', webkit: 'webkit' };
 const DEVICE_MAP = { chromium: 'Desktop Chrome', firefox: 'Desktop Firefox', webkit: 'Desktop Safari' };
 const CHANNEL_MAP = { chrome: 'chrome', msedge: 'msedge' };
@@ -20,7 +30,9 @@ if (process.env.ZEBRUNNER_CAPABILITIES) {
     if (caps.browserName) {
       browserName = caps.browserName;
       browserEngine = ENGINE_MAP[caps.browserName] || 'chromium';
-      channel = CHANNEL_MAP[caps.browserName];
+      if (!useRemoteGrid) {
+        channel = CHANNEL_MAP[caps.browserName];
+      }
     }
     if (caps.browserVersion) {
       browserVersion = caps.browserVersion;
@@ -42,7 +54,7 @@ module.exports = defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.PW_WORKERS ? parseInt(process.env.PW_WORKERS, 10) : (process.env.CI ? 1 : undefined),
 
   use: {
     trace: 'on-first-retry',
@@ -57,26 +69,18 @@ module.exports = defineConfig({
         ...devicePreset,
         ...(userAgent ? { userAgent } : {}),
         ...(channel ? { channel } : {}),
-        launchOptions: {
-          args: browserEngine === 'firefox'
-            ? ['-no-remote']
-            : ['--no-sandbox'],
-          firefoxUserPrefs: browserEngine === 'firefox'
-            ? { 'security.sandbox.content.level': 0 }
-            : undefined,
-        },
+        ...(!useRemoteGrid ? {
+          launchOptions: {
+            args: browserEngine === 'firefox'
+              ? ['-no-remote']
+              : ['--no-sandbox'],
+            firefoxUserPrefs: browserEngine === 'firefox'
+              ? { 'security.sandbox.content.level': 0 }
+              : undefined,
+          },
+        } : {}),
       },
     },
-
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
   ],
 
   reporter: [
