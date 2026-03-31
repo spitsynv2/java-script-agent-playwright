@@ -6,18 +6,20 @@ const { defineConfig, devices } = require('@playwright/test');
  */
 // require('dotenv').config();
 
-const BROWSER_MAP = { chrome: 'chromium', msedge: 'chromium', firefox: 'firefox', webkit: 'webkit' };
+const ENGINE_MAP = { chrome: 'chromium', msedge: 'chromium', firefox: 'firefox', webkit: 'webkit' };
 const DEVICE_MAP = { chromium: 'Desktop Chrome', firefox: 'Desktop Firefox', webkit: 'Desktop Safari' };
-const CHANNEL_BROWSERS = { chrome: 'chrome', msedge: 'msedge' };
+const CHANNEL_MAP = { chrome: 'chrome', msedge: 'msedge' };
 
-let browser = 'chromium';
+let browserEngine = 'chromium';
+let browserName = 'chromium';
 let channel = undefined;
 if (process.env.ZEBRUNNER_CAPABILITIES) {
   try {
     const caps = JSON.parse(process.env.ZEBRUNNER_CAPABILITIES);
     if (caps.browserName) {
-      browser = BROWSER_MAP[caps.browserName] || caps.browserName;
-      channel = CHANNEL_BROWSERS[caps.browserName];
+      browserName = caps.browserName;
+      browserEngine = ENGINE_MAP[caps.browserName] || 'chromium';
+      channel = CHANNEL_MAP[caps.browserName];
     }
   } catch (e) { /* ignore parse errors */ }
 }
@@ -40,10 +42,18 @@ module.exports = defineConfig({
 
   projects: [
     {
-      name: channel || browser,
+      name: browserName,
       use: {
-        ...devices[DEVICE_MAP[browser] || 'Desktop Chrome'],
+        ...devices[DEVICE_MAP[browserEngine] || 'Desktop Chrome'],
         ...(channel ? { channel } : {}),
+        launchOptions: {
+          args: browserEngine === 'firefox'
+            ? ['-no-remote']
+            : ['--no-sandbox'],
+          firefoxUserPrefs: browserEngine === 'firefox'
+            ? { 'security.sandbox.content.level': 0 }
+            : undefined,
+        },
       },
     },
 
@@ -55,16 +65,6 @@ module.exports = defineConfig({
     // {
     //   name: 'webkit',
     //   use: { ...devices['Desktop Safari'] },
-    // },
-
-    // {
-    //   name: 'msedge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-
-    // {
-    //   name: 'chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     // },
   ],
 
