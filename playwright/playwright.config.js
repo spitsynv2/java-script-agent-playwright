@@ -52,31 +52,59 @@ module.exports = defineConfig({
 
   projects: [
     {
-      name: browserName,
+      name: 'Pixel 5',
+      testMatch: /mobile\.spec\.js/,
       use: {
-        ...devicePreset,
-        ...(userAgent ? { userAgent } : {}),
+        ...devices['Pixel 5'],
         ...(channel ? { channel } : {}),
-        launchOptions: {
-          args: browserEngine === 'firefox'
-            ? ['-no-remote']
-            : ['--no-sandbox'],
-          firefoxUserPrefs: browserEngine === 'firefox'
-            ? { 'security.sandbox.content.level': 0 }
-            : undefined,
-        },
+        launchOptions: { args: ['--no-sandbox'] },
       },
     },
-
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+    {
+      name: 'Pixel 7',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['Pixel 7'],
+        ...(channel ? { channel } : {}),
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'Galaxy S8',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['Galaxy S8'],
+        ...(channel ? { channel } : {}),
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'Galaxy S9+',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['Galaxy S9+'],
+        ...(channel ? { channel } : {}),
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'Galaxy Tab S4',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['Galaxy Tab S4'],
+        ...(channel ? { channel } : {}),
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
+    {
+      name: 'Nexus 7',
+      testMatch: /mobile\.spec\.js/,
+      use: {
+        ...devices['Nexus 7'],
+        ...(channel ? { channel } : {}),
+        launchOptions: { args: ['--no-sandbox'] },
+      },
+    },
   ],
 
   reporter: [
