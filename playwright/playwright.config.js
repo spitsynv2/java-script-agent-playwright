@@ -6,6 +6,19 @@ const { defineConfig, devices } = require('@playwright/test');
  */
 // require('dotenv').config();
 
+const BROWSER_MAP = { chrome: 'chromium', msedge: 'chromium', firefox: 'firefox', webkit: 'webkit' };
+const DEVICE_MAP = { chromium: 'Desktop Chrome', firefox: 'Desktop Firefox', webkit: 'Desktop Safari' };
+
+let browser = 'chromium';
+if (process.env.ZEBRUNNER_CAPABILITIES) {
+  try {
+    const caps = JSON.parse(process.env.ZEBRUNNER_CAPABILITIES);
+    if (caps.browserName) {
+      browser = BROWSER_MAP[caps.browserName] || caps.browserName;
+    }
+  } catch (e) { /* ignore parse errors */ }
+}
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -24,19 +37,9 @@ module.exports = defineConfig({
 
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: browser,
+      use: { ...devices[DEVICE_MAP[browser] || 'Desktop Chrome'] },
     },
-
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
   ],
 
   reporter: [
