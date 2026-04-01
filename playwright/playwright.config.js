@@ -34,15 +34,19 @@ if (browserVersion && userAgent && /^\d+/.test(browserVersion)) {
   userAgent = userAgent.replace(/Chrome\/[\d.]+/, `Chrome/${browserVersion}`);
 }
 
+const parsedWorkers = Number.parseInt(process.env.PW_WORKERS || '', 10);
+const workers = Number.isFinite(parsedWorkers) && parsedWorkers > 0 ? parsedWorkers : undefined;
+const fullyParallel = process.env.PW_FULLY_PARALLEL === 'false' ? false : true;
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 module.exports = defineConfig({
   testDir: './test',
-  fullyParallel: true,
+  fullyParallel,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.PW_WORKERS ? parseInt(process.env.PW_WORKERS, 10) : 25,
+  workers,
 
   use: {
     trace: 'on-first-retry',
@@ -141,7 +145,7 @@ module.exports = defineConfig({
             testCycleKey: 'ZEB-R1',
           },
         },
-        pwConcurrentTasks: 25,
+        pwConcurrentTasks: 10,
       },
     ],
   ],

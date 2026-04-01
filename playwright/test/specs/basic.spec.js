@@ -22,6 +22,9 @@ const docPages = [
   { label: 'Parallelism', url: 'https://playwright.dev/docs/test-parallel', urlPattern: /test-parallel/ },
 ];
 
+const parsedTestCount = Number.parseInt(process.env.PW_TEST_COUNT || '', 10);
+const generatedTestCount = Number.isFinite(parsedTestCount) && parsedTestCount > 0 ? parsedTestCount : 25;
+
 async function docsWalkthrough(page, testNumber) {
   for (let i = 0; i < docPages.length; i++) {
     const doc = docPages[i];
@@ -70,7 +73,7 @@ async function docsWalkthrough(page, testNumber) {
 
 test.describe('Playwright website tests', () => {
 
-  for (let n = 1; n <= 25; n++) {
+  for (let n = 1; n <= generatedTestCount; n++) {
     test(`docs guide walkthrough ${n} [@large, @slow]`, async ({ page }) => {
       test.setTimeout(120_000);
       zebrunner.testCaseKey(`DEF-${n}`);
