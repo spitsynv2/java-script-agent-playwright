@@ -20,6 +20,39 @@ if (useRemoteGrid) {
   }
 }
 
+function maskUrlCredentials(rawUrl) {
+  try {
+    const parsed = new URL(rawUrl);
+    if (parsed.username || parsed.password) {
+      parsed.username = '***';
+      parsed.password = '***';
+    }
+    return parsed.toString();
+  } catch (_) {
+    return rawUrl;
+  }
+}
+
+if (remoteOnly) {
+  const remoteUrl = process.env.SELENIUM_REMOTE_URL || '';
+  if (!remoteUrl) {
+    throw new Error('REMOTE_ONLY mode is enabled but SELENIUM_REMOTE_URL is empty.');
+  }
+  if (/localhost|127\.0\.0\.1/.test(remoteUrl)) {
+    throw new Error(`REMOTE_ONLY mode: SELENIUM_REMOTE_URL looks local (${remoteUrl}).`);
+  }
+  const caps = process.env.SELENIUM_REMOTE_CAPABILITIES || '{}';
+  console.log(`[REMOTE_ONLY] enabled=true`);
+  console.log(`[REMOTE_ONLY] selenium_url=${maskUrlCredentials(remoteUrl)}`);
+  console.log(`[REMOTE_ONLY] capabilities=${caps}`);
+  // Emit transport logs so each run clearly proves Selenium path.
+  if (!process.env.DEBUG) {
+    process.env.DEBUG = 'pw:browser*';
+  } else if (!process.env.DEBUG.includes('pw:browser*')) {
+    process.env.DEBUG = `${process.env.DEBUG},pw:browser*`;
+  }
+}
+
 const ENGINE_MAP = { chrome: 'chromium', msedge: 'chromium', firefox: 'firefox', webkit: 'webkit' };
 const DEVICE_MAP = { chromium: 'Desktop Chrome', firefox: 'Desktop Firefox', webkit: 'Desktop Safari' };
 const CHANNEL_MAP = { chrome: 'chrome', msedge: 'msedge' };
