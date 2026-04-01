@@ -42,7 +42,7 @@ module.exports = defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.PW_WORKERS ? parseInt(process.env.PW_WORKERS, 10) : 8,
+  workers: process.env.PW_WORKERS ? parseInt(process.env.PW_WORKERS, 10) : 25,
 
   use: {
     trace: 'on-first-retry',
@@ -141,7 +141,7 @@ module.exports = defineConfig({
             testCycleKey: 'ZEB-R1',
           },
         },
-        pwConcurrentTasks: 10,
+        pwConcurrentTasks: 25,
       },
     ],
   ],
