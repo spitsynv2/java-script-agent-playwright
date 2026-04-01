@@ -145,7 +145,7 @@ module.exports = defineConfig({
             testCycleKey: 'ZEB-R1',
           },
         },
-        pwConcurrentTasks: 10,
+        pwConcurrentTasks: 25,
       },
     ],
   ],
