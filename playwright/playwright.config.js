@@ -37,6 +37,7 @@ if (browserVersion && userAgent && /^\d+/.test(browserVersion)) {
 const parsedWorkers = Number.parseInt(process.env.PW_WORKERS || '', 10);
 const workers = Number.isFinite(parsedWorkers) && parsedWorkers > 0 ? parsedWorkers : undefined;
 const fullyParallel = process.env.PW_FULLY_PARALLEL === 'false' ? false : true;
+const lightReport = process.env.PW_LIGHT_REPORT !== 'false';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -49,9 +50,9 @@ module.exports = defineConfig({
   workers,
 
   use: {
-    trace: 'on-first-retry',
-    screenshot: 'on',
-    video: 'on',
+    trace: lightReport ? 'off' : 'on-first-retry',
+    screenshot: lightReport ? 'only-on-failure' : 'on',
+    video: lightReport ? 'off' : 'on',
   },
 
   projects: [
@@ -105,7 +106,7 @@ module.exports = defineConfig({
           ignoreConsole: false,
           ignoreCustom: false,
           ignoreManualScreenshots: false,
-          ignoreAutoScreenshots: false,
+          ignoreAutoScreenshots: lightReport,
         },
         milestone: {
           id: null,

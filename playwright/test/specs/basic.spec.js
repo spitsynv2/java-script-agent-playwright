@@ -24,6 +24,14 @@ const docPages = [
 
 const parsedTestCount = Number.parseInt(process.env.PW_TEST_COUNT || '', 10);
 const generatedTestCount = Number.isFinite(parsedTestCount) && parsedTestCount > 0 ? parsedTestCount : 25;
+const attachManualScreenshots = process.env.PW_MANUAL_SCREENSHOTS === 'true';
+
+async function attachStepScreenshot(page) {
+  if (!attachManualScreenshots) {
+    return;
+  }
+  currentTest.attachScreenshot(await page.screenshot());
+}
 
 async function docsWalkthrough(page, testNumber) {
   for (let i = 0; i < docPages.length; i++) {
@@ -40,17 +48,17 @@ async function docsWalkthrough(page, testNumber) {
     if (doc.urlPattern) {
       await expect(page).toHaveURL(doc.urlPattern);
     }
-    currentTest.attachScreenshot(await page.screenshot());
+    await attachStepScreenshot(page);
 
     await page.evaluate(() => window.scrollBy(0, 600));
     await page.waitForTimeout(400);
-    currentTest.attachScreenshot(await page.screenshot());
+    await attachStepScreenshot(page);
 
     if (i % 2 === 0) {
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
       await page.waitForTimeout(400);
       currentTest.log.info(`Scrolled to bottom of ${doc.label}`);
-      currentTest.attachScreenshot(await page.screenshot());
+      await attachStepScreenshot(page);
     }
   }
 
@@ -65,7 +73,7 @@ async function docsWalkthrough(page, testNumber) {
     await tab.click();
     await page.waitForTimeout(300);
     currentTest.log.info(`Clicked ${tabName} tab`);
-    currentTest.attachScreenshot(await page.screenshot());
+    await attachStepScreenshot(page);
   }
 
   currentTest.log.info(`Test ${testNumber}: walkthrough finished — ${docPages.length} docs pages visited`);
