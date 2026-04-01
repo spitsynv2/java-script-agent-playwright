@@ -10,6 +10,7 @@ const { defineConfig, devices } = require('@playwright/test');
 // https://playwright.dev/docs/selenium-grid
 const remoteOnly = process.env.REMOTE_ONLY !== 'false';
 const useRemoteGrid = !!process.env.ZEBRUNNER_HUB_URL;
+const diagnosticRemote = process.env.DIAGNOSTIC_REMOTE === 'true';
 if (remoteOnly && !useRemoteGrid) {
   throw new Error('REMOTE_ONLY mode is enabled but ZEBRUNNER_HUB_URL is not set.');
 }
@@ -53,6 +54,11 @@ if (remoteOnly) {
   }
 }
 
+if (diagnosticRemote) {
+  console.log('[DIAGNOSTIC_REMOTE] enabled=true');
+  console.log('[DIAGNOSTIC_REMOTE] forcing retries=0, video=off, trace=off');
+}
+
 const ENGINE_MAP = { chrome: 'chromium', msedge: 'chromium', firefox: 'firefox', webkit: 'webkit' };
 const DEVICE_MAP = { chromium: 'Desktop Chrome', firefox: 'Desktop Firefox', webkit: 'Desktop Safari' };
 const CHANNEL_MAP = { chrome: 'chrome', msedge: 'msedge' };
@@ -90,13 +96,13 @@ module.exports = defineConfig({
   testDir: './test',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: diagnosticRemote ? 0 : (process.env.CI ? 2 : 0),
   workers: process.env.PW_WORKERS ? parseInt(process.env.PW_WORKERS, 10) : (process.env.CI ? 1 : undefined),
 
   use: {
-    trace: 'on-first-retry',
+    trace: diagnosticRemote ? 'off' : 'on-first-retry',
     screenshot: 'on',
-    video: 'on',
+    video: diagnosticRemote ? 'off' : 'on',
   },
 
   projects: [
