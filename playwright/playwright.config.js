@@ -38,6 +38,7 @@ const parsedWorkers = Number.parseInt(process.env.PW_WORKERS || '', 10);
 const workers = Number.isFinite(parsedWorkers) && parsedWorkers > 0 ? parsedWorkers : undefined;
 const fullyParallel = process.env.PW_FULLY_PARALLEL === 'false' ? false : true;
 const lightReport = process.env.PW_LIGHT_REPORT !== 'false';
+const androidChannel = ['chrome', 'msedge'].includes(channel) ? channel : undefined;
 
 const androidTabletPreset = {
   ...devices['Pixel 7'],
@@ -49,18 +50,20 @@ const androidTabletPreset = {
 
 const androidProjects = [
   {
-    name: 'android-phone',
+    name: `android-phone${androidChannel ? `-${androidChannel}` : ''}`,
     use: {
       ...devices['Pixel 7'],
       browserName: 'chromium',
+      ...(androidChannel ? { channel: androidChannel } : {}),
       launchOptions: { args: ['--no-sandbox'] },
     },
   },
   {
-    name: 'android-tablet',
+    name: `android-tablet${androidChannel ? `-${androidChannel}` : ''}`,
     use: {
       ...androidTabletPreset,
       browserName: 'chromium',
+      ...(androidChannel ? { channel: androidChannel } : {}),
       launchOptions: { args: ['--no-sandbox'] },
     },
   },
