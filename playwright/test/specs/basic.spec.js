@@ -2,6 +2,11 @@ const { expect, test } = require('@playwright/test');
 const { currentTest, currentLaunch, zebrunner } = require('@zebrunner/javascript-agent-playwright');
 
 test.describe('Playwright website tests', () => {
+  test.beforeEach(() => {
+    if (!process.env.ZEBRUNNER_HUB_URL || !process.env.SELENIUM_REMOTE_URL) {
+      throw new Error('Remote-only mode: ZEBRUNNER_HUB_URL / SELENIUM_REMOTE_URL is required.');
+    }
+  });
 
   test('has title [@small, @fast]', async ({ page }) => {
     zebrunner.testCaseKey('DEF-1');

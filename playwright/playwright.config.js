@@ -8,7 +8,11 @@ const { defineConfig, devices } = require('@playwright/test');
 
 // Connect to Zebrunner Hub via Selenium Grid (experimental)
 // https://playwright.dev/docs/selenium-grid
+const remoteOnly = process.env.REMOTE_ONLY !== 'false';
 const useRemoteGrid = !!process.env.ZEBRUNNER_HUB_URL;
+if (remoteOnly && !useRemoteGrid) {
+  throw new Error('REMOTE_ONLY mode is enabled but ZEBRUNNER_HUB_URL is not set.');
+}
 if (useRemoteGrid) {
   process.env.SELENIUM_REMOTE_URL = process.env.ZEBRUNNER_HUB_URL;
   if (process.env.ZEBRUNNER_CAPABILITIES) {
