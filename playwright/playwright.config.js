@@ -38,6 +38,24 @@ const parsedWorkers = Number.parseInt(process.env.PW_WORKERS || '', 10);
 const workers = Number.isFinite(parsedWorkers) && parsedWorkers > 0 ? parsedWorkers : undefined;
 const fullyParallel = process.env.PW_FULLY_PARALLEL === 'false' ? false : true;
 const lightReport = process.env.PW_LIGHT_REPORT !== 'false';
+const runIosOnly = true;
+
+const iosProjects = [
+  {
+    name: 'ios-phone',
+    use: {
+      ...devices['iPhone 13'],
+      browserName: 'webkit',
+    },
+  },
+  {
+    name: 'ios-tablet',
+    use: {
+      ...devices['iPad Pro 11'],
+      browserName: 'webkit',
+    },
+  },
+];
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -55,7 +73,7 @@ module.exports = defineConfig({
     video: lightReport ? 'off' : 'on',
   },
 
-  projects: [
+  projects: runIosOnly ? iosProjects : [
     {
       name: browserName,
       use: {
@@ -72,16 +90,6 @@ module.exports = defineConfig({
         },
       },
     },
-
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
   ],
 
   reporter: [
