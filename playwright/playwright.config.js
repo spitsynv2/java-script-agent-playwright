@@ -38,6 +38,51 @@ const parsedWorkers = Number.parseInt(process.env.PW_WORKERS || '', 10);
 const workers = Number.isFinite(parsedWorkers) && parsedWorkers > 0 ? parsedWorkers : undefined;
 const fullyParallel = process.env.PW_FULLY_PARALLEL === 'false' ? false : true;
 const lightReport = process.env.PW_LIGHT_REPORT !== 'false';
+const runAndroidOnly = true;
+
+const androidTabletPreset = {
+  ...devices['Pixel 7'],
+  viewport: { width: 1280, height: 800 },
+  userAgent: 'Mozilla/5.0 (Linux; Android 13; SM-T870) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  isMobile: true,
+  hasTouch: true,
+};
+
+const desktopProject = {
+  name: browserName,
+  use: {
+    ...devicePreset,
+    ...(userAgent ? { userAgent } : {}),
+    ...(channel ? { channel } : {}),
+    launchOptions: {
+      args: browserEngine === 'firefox'
+        ? ['-no-remote']
+        : ['--no-sandbox'],
+      firefoxUserPrefs: browserEngine === 'firefox'
+        ? { 'security.sandbox.content.level': 0 }
+        : undefined,
+    },
+  },
+};
+
+const androidProjects = [
+  {
+    name: 'android-phone',
+    use: {
+      ...devices['Pixel 7'],
+      browserName: 'chromium',
+      launchOptions: { args: ['--no-sandbox'] },
+    },
+  },
+  {
+    name: 'android-tablet',
+    use: {
+      ...androidTabletPreset,
+      browserName: 'chromium',
+      launchOptions: { args: ['--no-sandbox'] },
+    },
+  },
+];
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -55,34 +100,7 @@ module.exports = defineConfig({
     video: lightReport ? 'off' : 'on',
   },
 
-  projects: [
-    {
-      name: browserName,
-      use: {
-        ...devicePreset,
-        ...(userAgent ? { userAgent } : {}),
-        ...(channel ? { channel } : {}),
-        launchOptions: {
-          args: browserEngine === 'firefox'
-            ? ['-no-remote']
-            : ['--no-sandbox'],
-          firefoxUserPrefs: browserEngine === 'firefox'
-            ? { 'security.sandbox.content.level': 0 }
-            : undefined,
-        },
-      },
-    },
-
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
-  ],
+  projects: runAndroidOnly ? androidProjects : [desktopProject],
 
   reporter: [
     [
