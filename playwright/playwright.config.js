@@ -1,82 +1,60 @@
 const { defineConfig, devices } = require('@playwright/test');
+require('dotenv').config();
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
+const wsEndpoint = process.env.PLAYWRIGHT_WS_ENDPOINT;
+const isGrid = !!wsEndpoint;
 
-const ENGINE_MAP = { chrome: 'chromium', msedge: 'chromium', firefox: 'firefox', webkit: 'webkit' };
-const DEVICE_MAP = { chromium: 'Desktop Chrome', firefox: 'Desktop Firefox', webkit: 'Desktop Safari' };
-const CHANNEL_MAP = { chrome: 'chrome', msedge: 'msedge' };
-
-let browserEngine = 'chromium';
 let browserName = 'chromium';
 let browserVersion = undefined;
-let channel = undefined;
 if (process.env.ZEBRUNNER_CAPABILITIES) {
   try {
     const caps = JSON.parse(process.env.ZEBRUNNER_CAPABILITIES);
-    if (caps.browserName) {
-      browserName = caps.browserName;
-      browserEngine = ENGINE_MAP[caps.browserName] || 'chromium';
-      channel = CHANNEL_MAP[caps.browserName];
-    }
-    if (caps.browserVersion) {
-      browserVersion = caps.browserVersion;
-    }
-  } catch (e) { /* ignore parse errors */ }
+    if (caps.browserName) browserName = caps.browserName.toLowerCase();
+    if (caps.browserVersion) browserVersion = caps.browserVersion;
+  } catch (e) { /* ignore */ }
 }
 
-const devicePreset = devices[DEVICE_MAP[browserEngine] || 'Desktop Chrome'];
-let userAgent = devicePreset.userAgent;
-if (browserVersion && userAgent && /^\d+/.test(browserVersion)) {
-  userAgent = userAgent.replace(/Chrome\/[\d.]+/, `Chrome/${browserVersion}`);
-}
+const DEVICE_PRESET = {
+  chrome: 'Desktop Chrome',
+  chromium: 'Desktop Chrome',
+  edge: 'Desktop Edge',
+  firefox: 'Desktop Firefox',
+  webkit: 'Desktop Safari',
+  safari: 'Desktop Safari',
+};
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
+const devicePreset = devices[DEVICE_PRESET[browserName] || 'Desktop Chrome'];
+const projectName = browserVersion ? `${browserName}-${browserVersion}` : browserName;
+
+const parsedWorkers = Number.parseInt(process.env.PW_WORKERS || '', 10);
+const workers = Number.isFinite(parsedWorkers) && parsedWorkers > 0 ? parsedWorkers : undefined;
+
 module.exports = defineConfig({
   testDir: './test',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers,
 
   use: {
-    trace: 'on-first-retry',
     screenshot: 'on',
-    video: 'on',
+    trace: isGrid ? 'off' : 'on-first-retry',
+    video: isGrid ? 'off' : 'on',
+    ...(isGrid ? {
+      connectOptions: {
+        wsEndpoint,
+        timeout: 120_000,
+      },
+    } : {}),
   },
 
   projects: [
     {
-      name: browserName,
+      name: projectName,
       use: {
         ...devicePreset,
-        ...(userAgent ? { userAgent } : {}),
-        ...(channel ? { channel } : {}),
-        launchOptions: {
-          args: browserEngine === 'firefox'
-            ? ['-no-remote']
-            : ['--no-sandbox'],
-          firefoxUserPrefs: browserEngine === 'firefox'
-            ? { 'security.sandbox.content.level': 0 }
-            : undefined,
-        },
       },
     },
-
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
   ],
 
   reporter: [
@@ -92,7 +70,7 @@ module.exports = defineConfig({
         launch: {
           displayName: process.env.REPORTING_LAUNCH_DISPLAY_NAME || 'Playwright launch',
           build: '1.0.0',
-          environment: 'Local',
+          environment: wsEndpoint ? 'ESG Grid' : 'Local',
           treatSkipsAsFailures: true,
         },
         logs: {
