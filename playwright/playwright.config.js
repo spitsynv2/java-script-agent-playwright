@@ -6,11 +6,15 @@ const isGrid = !!wsEndpoint;
 
 let browserName = 'chromium';
 let browserVersion = undefined;
+let enableVNC = true;
+let enableVideo = true;
 if (process.env.ZEBRUNNER_CAPABILITIES) {
   try {
     const caps = JSON.parse(process.env.ZEBRUNNER_CAPABILITIES);
     if (caps.browserName) browserName = caps.browserName.toLowerCase();
     if (caps.browserVersion) browserVersion = caps.browserVersion;
+    if (caps.enableVNC === false) enableVNC = false;
+    if (caps.enableVideo === false) enableVideo = false;
   } catch (e) { /* ignore */ }
 }
 
@@ -22,6 +26,28 @@ const DEVICE_PRESET = {
   webkit: 'Desktop Safari',
   safari: 'Desktop Safari',
 };
+
+function gridConnectOptions(overrides = {}) {
+  if (!isGrid) return {};
+
+  const caps = {
+    browserName,
+    browserVersion,
+    enableVNC,
+    enableVideo,
+    ...overrides,
+  };
+
+  return {
+    connectOptions: {
+      wsEndpoint,
+      headers: {
+        'X-Zebrunner-Capabilities': JSON.stringify(caps),
+      },
+      timeout: 120_000,
+    },
+  };
+}
 
 const devicePreset = devices[DEVICE_PRESET[browserName] || 'Desktop Chrome'];
 const projectName = browserVersion ? `${browserName}-${browserVersion}` : browserName;
@@ -40,20 +66,13 @@ module.exports = defineConfig({
     screenshot: 'on',
     trace: isGrid ? 'off' : 'on-first-retry',
     video: isGrid ? 'off' : 'on',
-    ...(isGrid ? {
-      connectOptions: {
-        wsEndpoint,
-        timeout: 120_000,
-      },
-    } : {}),
+    ...gridConnectOptions(),
   },
 
   projects: [
     {
       name: projectName,
-      use: {
-        ...devicePreset,
-      },
+      use: { ...devicePreset },
     },
   ],
 
