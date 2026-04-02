@@ -30,6 +30,19 @@ const DEVICE_PRESET = {
 
 const playwrightVersion = require('@playwright/test/package.json').version;
 
+function getAuthHeader() {
+  const hubUrl = process.env.ZEBRUNNER_HUB_URL;
+  if (!hubUrl) return {};
+  try {
+    const parsed = new URL(hubUrl);
+    if (parsed.username) {
+      const auth = Buffer.from(`${parsed.username}:${parsed.password}`).toString('base64');
+      return { 'Authorization': `Basic ${auth}` };
+    }
+  } catch (e) { /* ignore */ }
+  return {};
+}
+
 function gridConnectOptions(overrides = {}) {
   if (!isGrid) return {};
 
@@ -45,6 +58,7 @@ function gridConnectOptions(overrides = {}) {
     connectOptions: {
       wsEndpoint,
       headers: {
+        ...getAuthHeader(),
         'X-Zebrunner-Capabilities': JSON.stringify(caps),
       },
       timeout: 120_000,
