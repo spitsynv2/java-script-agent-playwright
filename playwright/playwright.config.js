@@ -4,15 +4,16 @@ require('dotenv').config();
 const wsEndpoint = process.env.PLAYWRIGHT_WS_ENDPOINT;
 const isGrid = !!wsEndpoint;
 
+// ZEBRUNNER_CAPABILITIES is injected by ESG with the user's original request.
+// browserName = Selenium-style name (chrome, firefox, edge, etc.)
+// browserVersion = Selenium browser version (146.0) — NOT the Playwright version.
 let browserName = 'chromium';
-let browserVersion = undefined;
 let enableVNC = true;
 let enableVideo = true;
 if (process.env.ZEBRUNNER_CAPABILITIES) {
   try {
     const caps = JSON.parse(process.env.ZEBRUNNER_CAPABILITIES);
     if (caps.browserName) browserName = caps.browserName.toLowerCase();
-    if (caps.browserVersion) browserVersion = caps.browserVersion;
     if (caps.enableVNC === false) enableVNC = false;
     if (caps.enableVideo === false) enableVideo = false;
   } catch (e) { /* ignore */ }
@@ -27,12 +28,14 @@ const DEVICE_PRESET = {
   safari: 'Desktop Safari',
 };
 
+const playwrightVersion = require('@playwright/test/package.json').version;
+
 function gridConnectOptions(overrides = {}) {
   if (!isGrid) return {};
 
   const caps = {
     browserName,
-    browserVersion,
+    playwrightVersion,
     enableVNC,
     enableVideo,
     ...overrides,
@@ -50,7 +53,6 @@ function gridConnectOptions(overrides = {}) {
 }
 
 const devicePreset = devices[DEVICE_PRESET[browserName] || 'Desktop Chrome'];
-const projectName = browserVersion ? `${browserName}-${browserVersion}` : browserName;
 
 const parsedWorkers = Number.parseInt(process.env.PW_WORKERS || '', 10);
 const workers = Number.isFinite(parsedWorkers) && parsedWorkers > 0 ? parsedWorkers : undefined;
@@ -71,7 +73,7 @@ module.exports = defineConfig({
 
   projects: [
     {
-      name: projectName,
+      name: browserName,
       use: { ...devicePreset },
     },
   ],
