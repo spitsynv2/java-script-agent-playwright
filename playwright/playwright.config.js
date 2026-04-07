@@ -1,81 +1,120 @@
 const { defineConfig, devices } = require('@playwright/test');
+require('dotenv').config();
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
+const wsEndpoint = process.env.PLAYWRIGHT_WS_ENDPOINT;
+const isGrid = !!wsEndpoint;
 
-const ENGINE_MAP = { chrome: 'chromium', msedge: 'chromium', firefox: 'firefox', webkit: 'webkit' };
-const DEVICE_MAP = { chromium: 'Desktop Chrome', firefox: 'Desktop Firefox', webkit: 'Desktop Safari' };
-const CHANNEL_MAP = { chrome: 'chrome', msedge: 'msedge' };
+const playwrightVersion = require('@playwright/test/package.json').version;
 
-let browserEngine = 'chromium';
-let browserName = 'chromium';
-let browserVersion = undefined;
-let channel = undefined;
-if (process.env.ZEBRUNNER_CAPABILITIES) {
+const BROWSER_MAP = {
+  'chrome':               { pwName: 'playwright-chrome',    device: 'Desktop Chrome' },
+  'chromium':             { pwName: 'playwright-chromium',  device: 'Desktop Chrome' },
+  'firefox':              { pwName: 'playwright-firefox',   device: 'Desktop Firefox' },
+  'edge':                 { pwName: 'playwright-edge',      device: 'Desktop Edge' },
+  'microsoftedge':        { pwName: 'playwright-edge',      device: 'Desktop Edge' },
+  'playwright-chromium':  { pwName: 'playwright-chromium',  device: 'Desktop Chrome' },
+  'playwright-chrome':    { pwName: 'playwright-chrome',    device: 'Desktop Chrome' },
+  'playwright-firefox':   { pwName: 'playwright-firefox',   device: 'Desktop Firefox' },
+  'playwright-edge':      { pwName: 'playwright-edge',      device: 'Desktop Edge' },
+};
+
+const DEFAULT_BROWSER = { pwName: 'playwright-chromium', device: 'Desktop Chrome' };
+
+function parseZebrunnerCaps() {
+  const result = { browser: DEFAULT_BROWSER, zebrOptions: {} };
+  if (!process.env.ZEBRUNNER_CAPABILITIES) return result;
+
   try {
-    const caps = JSON.parse(process.env.ZEBRUNNER_CAPABILITIES);
-    if (caps.browserName) {
-      browserName = caps.browserName;
-      browserEngine = ENGINE_MAP[caps.browserName] || 'chromium';
-      channel = CHANNEL_MAP[caps.browserName];
+    const raw = JSON.parse(process.env.ZEBRUNNER_CAPABILITIES);
+
+    if (raw.browserName) {
+      result.browser = BROWSER_MAP[raw.browserName.toLowerCase()] || DEFAULT_BROWSER;
     }
-    if (caps.browserVersion) {
-      browserVersion = caps.browserVersion;
+
+    const ZEBR_PREFIX = 'zebrunner:';
+    for (const [key, val] of Object.entries(raw)) {
+      const name = key.startsWith(ZEBR_PREFIX) ? key.slice(ZEBR_PREFIX.length) : null;
+      if (!name) continue;
+
+      if (val === 'true') result.zebrOptions[name] = true;
+      else if (val === 'false') result.zebrOptions[name] = false;
+      else if (/^\d+$/.test(val)) result.zebrOptions[name] = parseInt(val, 10);
+      else result.zebrOptions[name] = val;
     }
-  } catch (e) { /* ignore parse errors */ }
+  } catch (e) { /* ignore */ }
+
+  return result;
 }
 
-const devicePreset = devices[DEVICE_MAP[browserEngine] || 'Desktop Chrome'];
-let userAgent = devicePreset.userAgent;
-if (browserVersion && userAgent && /^\d+/.test(browserVersion)) {
-  userAgent = userAgent.replace(/Chrome\/[\d.]+/, `Chrome/${browserVersion}`);
+const { browser: selectedBrowser, zebrOptions: parentZebrOptions } = parseZebrunnerCaps();
+const browserName = selectedBrowser.pwName;
+
+function getAuthHeader() {
+  const hubUrl = process.env.ZEBRUNNER_HUB_URL;
+  if (!hubUrl) return {};
+  try {
+    const parsed = new URL(hubUrl);
+    if (parsed.username) {
+      const auth = Buffer.from(`${parsed.username}:${parsed.password}`).toString('base64');
+      return { 'Authorization': `Basic ${auth}` };
+    }
+  } catch (e) { /* ignore */ }
+  return {};
 }
 
-function patchUserAgent(deviceName) {
-  const preset = devices[deviceName];
-  if (!browserVersion || !preset.userAgent) return {};
-  return { userAgent: preset.userAgent.replace(/Chrome\/[\d.]+/, `Chrome/${browserVersion}`) };
+function gridConnectOptions(overrides = {}) {
+  if (!isGrid) return {};
+
+  const capsBody = {
+    capabilities: {
+      alwaysMatch: {
+        platformName: 'playwright',
+        browserName,
+        browserVersion: playwrightVersion,
+        'zebrunner:options': { ...parentZebrOptions, ...overrides },
+      },
+    },
+  };
+
+  return {
+    connectOptions: {
+      wsEndpoint,
+      headers: {
+        ...getAuthHeader(),
+        'X-Zebrunner-Capabilities': JSON.stringify(capsBody),
+      },
+      timeout: 600_000,
+    },
+  };
 }
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
+const parsedWorkers = Number.parseInt(process.env.PW_WORKERS || '', 10);
+const workers = Number.isFinite(parsedWorkers) && parsedWorkers > 0 ? parsedWorkers : undefined;
+
 module.exports = defineConfig({
   testDir: './test',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers,
 
   use: {
-    trace: 'on-first-retry',
     screenshot: 'on',
-    video: 'on',
+    trace: isGrid ? 'off' : 'on-first-retry',
+    video: isGrid ? 'off' : 'on',
+    ...gridConnectOptions(),
   },
 
   projects: [
     {
       name: 'Galaxy S9+',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['Galaxy S9+'],
-        ...patchUserAgent('Galaxy S9+'),
-        ...(channel ? { channel } : {}),
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['Galaxy S9+'] },
     },
     {
       name: 'Galaxy Tab S4',
       testMatch: /mobile\.spec\.js/,
-      use: {
-        ...devices['Galaxy Tab S4'],
-        ...patchUserAgent('Galaxy Tab S4'),
-        ...(channel ? { channel } : {}),
-        launchOptions: { args: ['--no-sandbox'] },
-      },
+      use: { ...devices['Galaxy Tab S4'] },
     },
   ],
 
@@ -90,9 +129,9 @@ module.exports = defineConfig({
           accessToken: process.env.REPORTING_SERVER_ACCESS_TOKEN || 'yourAccessToken',
         },
         launch: {
-          displayName: process.env.REPORTING_LAUNCH_DISPLAY_NAME || 'Playwright launch',
+          displayName: process.env.REPORTING_LAUNCH_DISPLAY_NAME || 'Playwright Android Emulators',
           build: '1.0.0',
-          environment: 'Local',
+          environment: isGrid ? 'ESG Grid' : 'Local',
           treatSkipsAsFailures: true,
         },
         logs: {
