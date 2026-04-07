@@ -105,18 +105,20 @@ function gridConnectOptions(overrides = {}) {
 
 const parsedWorkers = Number.parseInt(process.env.PW_WORKERS || '', 10);
 const workers = Number.isFinite(parsedWorkers) && parsedWorkers > 0 ? parsedWorkers : undefined;
+const fullyParallel = process.env.PW_FULLY_PARALLEL === 'false' ? false : true;
+const lightReport = process.env.PW_LIGHT_REPORT !== 'false';
 
 module.exports = defineConfig({
   testDir: './test',
-  fullyParallel: true,
+  fullyParallel,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers,
 
   use: {
-    screenshot: 'on',
-    trace: isGrid ? 'off' : 'on-first-retry',
-    video: isGrid ? 'off' : 'on',
+    screenshot: lightReport ? 'only-on-failure' : 'on',
+    trace: (isGrid || lightReport) ? 'off' : 'on-first-retry',
+    video: (isGrid || lightReport) ? 'off' : 'on',
     ...gridConnectOptions(),
   },
 
@@ -149,7 +151,7 @@ module.exports = defineConfig({
           ignoreConsole: false,
           ignoreCustom: false,
           ignoreManualScreenshots: false,
-          ignoreAutoScreenshots: false,
+          ignoreAutoScreenshots: lightReport,
         },
         milestone: {
           id: null,
@@ -189,7 +191,7 @@ module.exports = defineConfig({
             testCycleKey: 'ZEB-R1',
           },
         },
-        pwConcurrentTasks: 10,
+        pwConcurrentTasks: 25,
       },
     ],
   ],
