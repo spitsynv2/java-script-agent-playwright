@@ -106,7 +106,7 @@ function gridConnectOptions(overrides = {}) {
 const parsedWorkers = Number.parseInt(process.env.PW_WORKERS || '', 10);
 const workers = Number.isFinite(parsedWorkers) && parsedWorkers > 0 ? parsedWorkers : undefined;
 const fullyParallel = process.env.PW_FULLY_PARALLEL === 'false' ? false : true;
-const lightReport = process.env.PW_LIGHT_REPORT !== 'false';
+const lightReport = process.env.PW_LIGHT_REPORT === 'true';
 
 module.exports = defineConfig({
   testDir: './test',
