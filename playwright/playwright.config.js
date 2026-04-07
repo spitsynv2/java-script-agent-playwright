@@ -117,6 +117,7 @@ module.exports = defineConfig({
 
   use: {
     screenshot: lightReport ? 'only-on-failure' : 'on',
+    video: (isGrid || lightReport) ? 'off' : 'on',
     trace: (isGrid || lightReport) ? 'off' : 'on-first-retry',
     ...gridConnectOptions(),
   },
