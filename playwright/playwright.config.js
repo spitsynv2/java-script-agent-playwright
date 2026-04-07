@@ -1,102 +1,43 @@
-const { defineConfig, devices } = require('@playwright/test');
-
-const BROWSER = process.env.BROWSER || 'chromium';
-const BROWSER_CHANNEL = process.env.BROWSER_CHANNEL || undefined;
-
-const DEVICE_MAP = {
-  chromium: 'Desktop Chrome',
-  firefox: 'Desktop Firefox',
-  webkit: 'Desktop Safari',
-};
-
 /**
- * See https://playwright.dev/docs/test-configuration.
+ * This branch runs only real-device Android tests (see test/specs/android-real.spec.js).
+ *
+ * Remote server — install/run:
+ *   - Node.js LTS + npm; clone repo; `cd playwright && npm ci`
+ *   - Android device visible to ADB: `adb devices` must show one device (or set ANDROID_SERIAL)
+ *   - Android SDK platform-tools (`adb`) on PATH if you use USB or local `adb start-server`
+ *   - Chrome on the device (87+); chrome://flags → enable "command line on non-rooted devices"
+ *   - Network: tests need HTTPS to targets (playwright.dev, etc.); ADB may be TCP — set ADB_SERVER_*
+ *   - Multi-host: each runner machine uses its own .env (or CI vars) with the right ANDROID_SERIAL
+ *   - Multi-device on one host: run separate jobs with different ANDROID_SERIAL
+ *
+ * You do not need `npx playwright install` for desktop Chromium — the browser runs on the phone.
+ *
+ * Env:
+ *   ADB_SERVER_HOST, ADB_SERVER_PORT — adb server (default 127.0.0.1:5037)
+ *   ANDROID_SERIAL — which device when several are connected
+ *   ANDROID_OMIT_DRIVER_INSTALL — "true" if Playwright drivers already on device
+ *
+ * @see https://playwright.dev/docs/api/class-android
  */
+const { defineConfig } = require('@playwright/test');
+require('dotenv').config();
+
 module.exports = defineConfig({
   testDir: './test',
-  fullyParallel: true,
+  testMatch: /android-real\.spec\.js/,
+  fullyParallel: false,
+  workers: 1,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  retries: process.env.CI ? 1 : 0,
+
+  timeout: 180_000,
+  expect: { timeout: 30_000 },
 
   use: {
-    baseURL: 'https://www.ebay.com',
     trace: 'on-first-retry',
     screenshot: 'on',
-    viewport: { width: 1920, height: 1080 },
+    video: 'off',
   },
 
-  projects: [
-    {
-      name: BROWSER,
-      use: {
-        ...devices[DEVICE_MAP[BROWSER] || 'Desktop Chrome'],
-        channel: BROWSER_CHANNEL,
-        launchOptions: {
-          headless: false,
-          args: BROWSER === 'chromium'
-            ? ['--disable-blink-features=AutomationControlled']
-            : [],
-        },
-      },
-    },
-  ],
-
-  reporter: [
-    [
-      '@zebrunner/javascript-agent-playwright',
-      {
-        enabled: true,
-        projectKey: 'DEF',
-        server: {
-          hostname: 'https://yourCompany.zebrunner.com',
-          accessToken: 'yourAccessToken',
-        },
-        launch: {
-          displayName: 'Playwright launch',
-          build: '1.0.0',
-          environment: 'Local',
-        },
-        milestone: {
-          id: null,
-          name: null,
-        },
-        notifications: {
-          notifyOnEachFailure: false,
-          slackChannels: 'dev, qa',
-          teamsChannels: 'dev-channel, management',
-          emails: 'yourEmail@solvd.com',
-        },
-        tcm: {
-          zebrunner: {
-            pushResults: false,
-            pushInRealTime: false,
-            testRunId: 1,
-          },
-          testRail: {
-            pushResults: false,
-            pushInRealTime: false,
-            suiteId: 1,
-            runId: 1,
-            includeAllTestCasesInNewRun: false,
-            runName: 'New Demo Run',
-            milestoneName: 'Demo Milestone',
-            assignee: 'tester@mycompany.com',
-          },
-          xray: {
-            pushResults: false,
-            pushInRealTime: false,
-            executionKey: 'ZEB-1',
-          },
-          zephyr: {
-            pushResults: false,
-            pushInRealTime: false,
-            jiraProjectKey: 'ZEB',
-            testCycleKey: 'ZEB-R1',
-          },
-        },
-        pwConcurrentTasks: 10,
-      },
-    ],
-  ],
+  projects: [{ name: 'android-real-chrome', testMatch: /android-real\.spec\.js/ }],
 });
