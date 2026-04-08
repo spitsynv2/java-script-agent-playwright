@@ -2,14 +2,19 @@
  * iOS Safari fixtures — uses webkit.connect() for real Playwright API.
  *
  * Env:
- *   IOS_WS_ENDPOINT — WebSocket URL to the Safari bridge
- *   IOS_DEVICE_NAME — Playwright device preset (default: "iPhone 15")
+ *   IOS_WS_ENDPOINT  — WebSocket URL to the Safari bridge
+ *                       e.g. ws://safari-bridge:3000/safari
+ *   IOS_DEVICE_NAME  — Playwright device preset (default: "iPhone_XR")
+ *   IOS_DEVICE_SCALE — Device scale factor override (default: from preset)
  */
 const { test: base, expect, webkit, devices } = require('@playwright/test');
 
 const wsEndpoint = process.env.IOS_WS_ENDPOINT || '';
 const deviceName = process.env.IOS_DEVICE_NAME || 'iPhone_XR';
-const devicePreset = devices[deviceName] || devices['iPhone_XR'];
+const devicePreset = devices[deviceName] || {};
+const deviceScaleFactor = process.env.IOS_DEVICE_SCALE
+  ? parseFloat(process.env.IOS_DEVICE_SCALE)
+  : undefined;
 
 const test = base.extend({
   browser: async ({}, use) => {
@@ -26,7 +31,9 @@ const test = base.extend({
   },
 
   context: async ({ browser }, use) => {
-    const context = await browser.newContext({ ...devicePreset });
+    const contextOptions = { ...devicePreset };
+    if (deviceScaleFactor) contextOptions.deviceScaleFactor = deviceScaleFactor;
+    const context = await browser.newContext(contextOptions);
     await use(context);
     await context.close();
   },
